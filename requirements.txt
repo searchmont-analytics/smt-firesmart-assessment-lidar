@@ -5,3 +5,4 @@ shapely>=2.0
 pyproj>=3.6
 pyyaml>=6.0
 matplotlib>=3.8
+cryptography>=42
