@@ -31,42 +31,8 @@ python scripts/validate_synthetic.py data/synthetic_searchmont.truth.json output
 python scripts/build_map.py --out output
 ```
 
-GitHub Pages (`/docs`):
-
-* `docs/index.html`: demo on synthetic data showing how the scoring works, with a button to the real map.
-* `docs/searchmont-2024.html`: the real nine-tile Searchmont run (204 houses, 2024 LiDAR), encrypted with
-  [StaticCrypt](https://github.com/robinmoisson/staticrypt). It opens only with the shared passphrase.
-  The unencrypted map is never committed. To re-encrypt after a new run:
-
-  ```bash
-  npx staticrypt@3.5.4 output_mosaic/searchmont_firesmart_map.html -p "<passphrase>" -d docs --short --remember 0
-  mv docs/searchmont_firesmart_map.html docs/searchmont-2024.html
-  ```
-
 Outputs in `output/`: `risk_map.html`, `properties.geojson`, `zones.geojson` (WGS84),
 `properties.csv`, `canopy.png` / `ladder.png` overlays, `summary.json`.
-
-## Several tiles at once
-
-```bash
-python scripts/run_mosaic.py --tiles "path/to/tiles/*.laz" --out output_mosaic --config config_ssm2024.yaml --name Searchmont
-python scripts/build_map.py --out output_mosaic --tag "2024 LiDAR" \
-    --attribution "LiDAR: NRCan CanElevation / Ontario, 2024 · Open Government Licence – Canada"
-```
-
-Tiles are streamed one at a time, so memory stays near one tile. Houses near an inner tile edge get their full
-30 m ring from the neighbour. Nine 2024 Sault Ste Marie tiles (about 200 M points) take ~5 minutes.
-
-## Getting Searchmont tiles
-
-The 2024 Sault Ste Marie lift is public on NRCan's CanElevation bucket (no ordering needed):
-
-```
-https://canelevation-lidar-point-clouds.s3.ca-central-1.amazonaws.com/pointclouds_nuagespoints/ON/Sault_SteMarie_UTM16_2024/1km16EEE0NNNN02024LSAULTSTEMARIE_CPC.copc.laz
-```
-
-`EEE` is the easting in km and `NNNN` the northing in km (UTM 16N). Searchmont's 3 × 3 block is EEE 724–726,
-NNNN 5183–5185. Use `config_ssm2024.yaml` for these tiles (~20 pts/m², buildings pre-classified).
 
 ## Running it on real Ontario data
 

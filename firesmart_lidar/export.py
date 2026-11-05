@@ -62,7 +62,8 @@ def _hillshade(dtm, cell, az=315, alt=40):
     return np.clip(hs, 0, 1)
 
 
-def write_rasters(dtm, chm, ladder_n, bld_mask, grid, crs, cfg, out: Path, px_m=0.5, canopy_fmt="png"):
+def write_rasters(dtm, chm, ladder_n, bld_mask, grid, crs, cfg, out: Path, px_m=0.5, canopy_fmt="png", valid=None):
+    """valid: optional bool grid, False where there is no LiDAR (drawn transparent)."""
     """Resample to EPSG:3857 so the overlay lines up exactly with the vectors in Leaflet."""
     to_merc = Transformer.from_crs(crs, 3857, always_xy=True)
     back = Transformer.from_crs(3857, crs, always_xy=True)
@@ -90,6 +91,8 @@ def write_rasters(dtm, chm, ladder_n, bld_mask, grid, crs, cfg, out: Path, px_m=
     lad = sample((ladder_n >= cfg["vegetation"]["ladder_min_returns"]).astype(float), 0)
     bm = sample(bld_mask.astype(float), 0)
     ins = inside.reshape(H, W)
+    if valid is not None:
+        ins = ins & (sample(valid.astype(float), 0) > 0.5)
 
     # base: hillshaded terrain tinted by canopy height
     ground = np.dstack([0.86 * np.ones_like(hs), 0.83 * np.ones_like(hs), 0.74 * np.ones_like(hs)])

@@ -235,7 +235,9 @@ def recommendations(m):
     return rec
 
 
-def score_buildings(footprints, chm, ladder_n, overhang_cells, dtm, grid: Grid, cfg):
+def score_buildings(footprints, chm, ladder_n, overhang_cells, dtm, grid: Grid, cfg, coverage=None, valid=None):
+    """coverage: optional polygon of where LiDAR exists (default: the whole grid).
+    valid: optional bool grid; cells without LiDAR are left out of every ring."""
     v, z, sc = cfg["vegetation"], cfg["zones_m"], cfg["scoring"]
     GX, GY = grid.centers()
     all_bld = np.zeros((grid.ny, grid.nx), bool)
@@ -263,6 +265,8 @@ def score_buildings(footprints, chm, ladder_n, overhang_cells, dtm, grid: Grid, 
         sub = (slice(r0[0], r1[0] + 1), slice(c0[0], c1[0] + 1))
         d = shapely.distance(p, shapely.points(GX[sub], GY[sub]))
         free = ~all_bld[sub]
+        if valid is not None:
+            free &= valid[sub]
         m = {"property_id": pid, "footprint_m2": round(p.area, 1)}
         for zn in ("zone0", "zone1", "zone2"):
             a, b_ = z[zn]
@@ -284,7 +288,7 @@ def score_buildings(footprints, chm, ladder_n, overhang_cells, dtm, grid: Grid, 
                           "geom": p.buffer(z["zone0"][1]).difference(p)})
 
         # how much of the 30 m ring the tile actually covers (houses near a tile edge)
-        tile = box(grid.xmin, grid.ymin, grid.xmin + grid.nx * grid.cell, grid.ymin + grid.ny * grid.cell)
+        tile = coverage if coverage is not None else box(grid.xmin, grid.ymin, grid.xmin + grid.nx * grid.cell, grid.ymin + grid.ny * grid.cell)
         z2 = p.buffer(z["zone2"][1]).difference(p)
         m["zone2_coverage_pct"] = round(100 * z2.intersection(tile).area / z2.area, 1)
 
