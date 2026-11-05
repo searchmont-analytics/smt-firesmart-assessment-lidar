@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Searchmont Ignition Zone Map</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -727,6 +728,8 @@ h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
   background: var(--accent); color: var(--accent-ink); font: 600 15px var(--font-display); letter-spacing: .02em; text-decoration: none; }
 .cta:hover { filter: brightness(1.08); }
 .cta:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.cta-note { margin: 8px 0 0; font-size: 13px; }
+.cta-note a { color: inherit; font-weight: 600; }
 .cta small { font: 500 12px var(--font-body); opacity: .85; }
 .demo-tag { display: inline-block; font-family: var(--font-display); font-weight: 600; font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
   border: 1px solid var(--line); border-radius: 3px; padding: 1px 7px; margin-left: 6px; color: var(--muted); vertical-align: 3px; }
@@ -831,6 +834,7 @@ table.th td { color: var(--muted); font-family: var(--font-data); font-variant-n
       <h1>Searchmont neighbourhood wildfire map<span class="demo-tag">Synthetic demo data</span></h1>
       <p>How it works: every house is scored on tree canopy and ladder fuel within 10 m and 30 m, measured from an airborne LiDAR point cloud. This demo runs on a simulated tile laid out like a rural road near Searchmont. The real 2024 Searchmont map uses the same method on 111 one-kilometre Ontario LiDAR tiles covering the Searchmont highway corridor and side roads, where most buildings in the Searchmont Fire Department response area (Deroche, Hodgins, Gaudette and Shields townships) are located: 603 houses in all.</p>
       <a class="cta" href="searchmont-2024.html">View the 2024 Searchmont LiDAR map → <small>password required</small></a>
+      <p class="cta-note">No passphrase? <a href="https://forms.gle/5YqVHb2BQppUUmCk9" target="_blank" rel="noopener">Request one here</a>.</p>
     </div>
     <div class="tally" id="tally" aria-label="Properties by rating"></div>
   </header>
