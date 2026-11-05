@@ -24,6 +24,8 @@ def main():
         "Every house scored on tree canopy and ladder fuel within 10 m and 30 m, measured from an "
         "airborne LiDAR point cloud. This demo runs on a simulated tile laid out like a rural road near "
         "Searchmont; the same code runs on Ontario GeoHub tiles."))
+    ap.add_argument("--cta-href", default="", help="optional button link shown under the intro")
+    ap.add_argument("--cta-text", default="")
     ap.add_argument("--attribution", default="Synthetic LiDAR tile · method after FireSmart Canada HIZ")
     a = ap.parse_args()
 
@@ -43,6 +45,8 @@ def main():
                 .replace("__LADDER__", b64(a.out / "ladder.png"))
                 .replace("__TITLE__", a.title).replace("__H1__", a.h1)
                 .replace("__TAG__", a.tag).replace("__INTRO__", a.intro))
+    if a.cta_href:
+        html = html.replace("<!--__CTA__-->", f'<a class="cta" href="{a.cta_href}">{a.cta_text} <small>password required</small></a>')
     dest = a.html or (a.out / "risk_map.html")
     dest.write_text(html)
     print(f"wrote {dest} ({dest.stat().st_size / 1e6:.1f} MB)")

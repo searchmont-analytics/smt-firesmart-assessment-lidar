@@ -723,6 +723,11 @@ h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
 .top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; }
 .top h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; line-height: 1.05; letter-spacing: -.01em; }
 .top p { margin: 6px 0 0; color: var(--muted); max-width: 62ch; }
+.cta { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; padding: 9px 16px; border-radius: 4px;
+  background: var(--accent); color: var(--accent-ink); font: 600 15px var(--font-display); letter-spacing: .02em; text-decoration: none; }
+.cta:hover { filter: brightness(1.08); }
+.cta:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.cta small { font: 500 12px var(--font-body); opacity: .85; }
 .demo-tag { display: inline-block; font-family: var(--font-display); font-weight: 600; font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
   border: 1px solid var(--line); border-radius: 3px; padding: 1px 7px; margin-left: 6px; color: var(--muted); vertical-align: 3px; }
 .tally { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -824,7 +829,8 @@ table.th td { color: var(--muted); font-family: var(--font-data); font-variant-n
     <div>
       <div class="eyebrow">FireSmart Home Ignition Zone · LiDAR screening</div>
       <h1>Searchmont neighbourhood wildfire map<span class="demo-tag">Synthetic demo data</span></h1>
-      <p>Every house scored on tree canopy and ladder fuel within 10 m and 30 m, measured from an airborne LiDAR point cloud. This demo runs on a simulated tile laid out like a rural road near Searchmont; the same code runs on Ontario GeoHub tiles.</p>
+      <p>How it works: every house is scored on tree canopy and ladder fuel within 10 m and 30 m, measured from an airborne LiDAR point cloud. This demo runs on a simulated tile laid out like a rural road near Searchmont. The real 2024 Searchmont map uses the same method on nine Ontario LiDAR tiles.</p>
+      <a class="cta" href="searchmont-2024.html">View the 2024 Searchmont LiDAR map → <small>password required</small></a>
     </div>
     <div class="tally" id="tally" aria-label="Properties by rating"></div>
   </header>

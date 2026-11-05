@@ -31,7 +31,17 @@ python scripts/validate_synthetic.py data/synthetic_searchmont.truth.json output
 python scripts/build_map.py --out output
 ```
 
-A live demo on synthetic data is in `docs/index.html` (enable GitHub Pages on `/docs` to publish it).
+GitHub Pages (`/docs`):
+
+* `docs/index.html`: demo on synthetic data showing how the scoring works, with a button to the real map.
+* `docs/searchmont-2024.html`: the real nine-tile Searchmont run (204 houses, 2024 LiDAR), encrypted with
+  [StaticCrypt](https://github.com/robinmoisson/staticrypt). It opens only with the shared passphrase.
+  The unencrypted map is never committed. To re-encrypt after a new run:
+
+  ```bash
+  npx staticrypt@3.5.4 output_mosaic/searchmont_firesmart_map.html -p "<passphrase>" -d docs --short --remember 0
+  mv docs/searchmont_firesmart_map.html docs/searchmont-2024.html
+  ```
 
 Outputs in `output/`: `risk_map.html`, `properties.geojson`, `zones.geojson` (WGS84),
 `properties.csv`, `canopy.png` / `ladder.png` overlays, `summary.json`.
