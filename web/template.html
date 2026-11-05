@@ -1,0 +1,413 @@
+<title>__TITLE__</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/*__LEAFLET_CSS__*/
+</style>
+<style>
+/* Layout: field-map tool. Map on the left, property sheet on the right; stacks on phones. */
+:root {
+  --bg: #eceee8;
+  --surface: #f9faf7;
+  --ink: #1b2420;
+  --muted: #59665f;
+  --line: #d3d9d1;
+  --accent: #1d5a48;
+  --accent-ink: #f4f7f5;
+  --mapbg: #d7dbd1;
+  --low: #2a8461;
+  --moderate: #c8960f;
+  --high: #d9611a;
+  --extreme: #b8242b;
+  --ladder: #e8590c;
+  --pill-ink: #ffffff;
+  --z0: #6b6f6c;
+  --z1: #d9611a;
+  --z2: #c8960f;
+  --font-display: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Public Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111614; --surface: #19201d; --ink: #e2e9e4; --muted: #95a39b; --line: #2b3631;
+    --accent: #63b59b; --accent-ink: #0d1411; --mapbg: #0c100e;
+    --low: #45b585; --moderate: #e2b234; --high: #f07c37; --extreme: #ec5157;
+    --ladder: #ff7a2e; --pill-ink: #0f1311; --z0: #aab1ad; --z1: #f07c37; --z2: #e2b234;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111614; --surface: #19201d; --ink: #e2e9e4; --muted: #95a39b; --line: #2b3631;
+  --accent: #63b59b; --accent-ink: #0d1411; --mapbg: #0c100e;
+  --low: #45b585; --moderate: #e2b234; --high: #f07c37; --extreme: #ec5157;
+  --ladder: #ff7a2e; --pill-ink: #0f1311; --z0: #aab1ad; --z1: #f07c37; --z2: #e2b234;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px;
+}
+.wrap { max-width: 1320px; margin: 0 auto; display: grid; gap: 18px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+.eyebrow { font-family: var(--font-display); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; font-size: 13px; color: var(--accent); }
+.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+
+/* header */
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; }
+.top h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 700; line-height: 1.05; letter-spacing: -.01em; }
+.top p { margin: 6px 0 0; color: var(--muted); max-width: 62ch; }
+.demo-tag { display: inline-block; font-family: var(--font-display); font-weight: 600; font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+  border: 1px solid var(--line); border-radius: 3px; padding: 1px 7px; margin-left: 6px; color: var(--muted); vertical-align: 3px; }
+.tally { display: flex; gap: 6px; flex-wrap: wrap; }
+.tally div { min-width: 82px; padding: 8px 12px; border-top: 4px solid var(--c); background: var(--surface); }
+.tally b { display: block; font-family: var(--font-data); font-size: 22px; line-height: 1.1; }
+.tally span { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+
+/* main */
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 0; background: var(--surface); border: 1px solid var(--line); }
+@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.mapcol { display: grid; grid-template-rows: auto 1fr auto; min-width: 0; border-right: 1px solid var(--line); }
+@media (max-width: 900px) { .mapcol { border-right: 0; border-bottom: 1px solid var(--line); } }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.seg button { font: inherit; font-size: 13px; padding: 5px 11px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.controls label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.controls .lbl { color: var(--muted); font-size: 13px; }
+button:focus-visible, input:focus-visible, .row:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#map { height: min(72vh, 680px); min-height: 360px; background: var(--mapbg); }
+.leaflet-container { background: var(--mapbg); font-family: var(--font-body); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 10px 14px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); align-items: center; }
+.legend .item { display: inline-flex; gap: 6px; align-items: center; }
+.ramp { width: 90px; height: 9px; background: linear-gradient(90deg, #cfd8a4, #6f9a54, #2f5a32, #183c22); }
+.sw { width: 12px; height: 12px; display: inline-block; }
+.ring { width: 14px; height: 10px; border: 2px solid var(--c); display: inline-block; }
+
+/* markers */
+.pin { display: grid; place-items: center; width: 34px; height: 22px; border-radius: 3px; background: var(--c); color: var(--pill-ink);
+  font: 600 12px/1 var(--font-display); letter-spacing: .03em; box-shadow: 0 0 0 1.5px rgba(255,255,255,.85), 0 1px 4px rgba(0,0,0,.35); }
+.pin.sel { outline: 3px solid var(--ink); outline-offset: 1px; }
+.pin.ob { width: 26px; height: 16px; background: var(--surface); color: var(--muted); font-size: 10px; }
+.lowzoom .pin { width: 12px; height: 12px; font-size: 0; border-radius: 50%; transform: translate(11px, 14px); }
+.lowzoom .pin.sel { outline-offset: 0; }
+.lowzoom .pin.ob { display: none; }
+
+/* side panel */
+.panel { min-width: 0; display: flex; flex-direction: column; max-height: calc(min(72vh, 680px) + 100px); }
+@media (max-width: 900px) { .panel { max-height: none; } #map { height: 58vh; } }
+.panel-head { padding: 14px 16px 10px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.panel-head h2 { font-size: 20px; font-weight: 600; }
+.panel-body { overflow-y: auto; padding: 0 0 14px; }
+.back { font: inherit; font-size: 13px; border: 1px solid var(--line); background: transparent; color: var(--ink); padding: 4px 10px; border-radius: 4px; cursor: pointer; }
+.list { list-style: none; margin: 0; padding: 0; }
+.row { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 16px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.row:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.row .id { font: 600 15px var(--font-display); }
+.row .mini, .list-head .mini { display: grid; grid-template-columns: 44px minmax(0, 52px) minmax(0, 52px); gap: 0 6px; font-size: 12px; color: var(--muted); }
+.row .mini .num { text-align: right; }
+.list-head { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 10px; padding: 10px 16px 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); border-bottom: 1px solid var(--line); }
+.list-head .mini { font-size: 11px; }
+.list-head .mini span:not(:first-child) { text-align: right; }
+.row .mini .num { color: var(--ink); }
+.pill { display: inline-block; font: 600 12px/1 var(--font-display); letter-spacing: .05em; text-transform: uppercase; padding: 5px 8px; border-radius: 3px; background: var(--c); color: var(--pill-ink); white-space: nowrap; }
+.score-big { display: flex; align-items: baseline; gap: 10px; padding: 16px 16px 4px; }
+.score-big b { font: 500 44px/1 var(--font-data); }
+.score-big > span:last-child { color: var(--muted); font-size: 13px; }
+.scorebar { margin: 6px 16px 4px; height: 8px; background: linear-gradient(90deg, var(--low) 0 25%, var(--moderate) 25% 50%, var(--high) 50% 75%, var(--extreme) 75% 100%); position: relative; opacity: .9; }
+.scorebar i { position: absolute; top: -5px; width: 3px; height: 18px; background: var(--ink); transform: translateX(-1px); }
+.facts { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); margin: 14px 16px 0; border: 1px solid var(--line); }
+.facts div { background: var(--surface); padding: 7px 10px; font-size: 12px; color: var(--muted); }
+.facts b { display: block; font-family: var(--font-data); font-weight: 500; font-size: 15px; color: var(--ink); }
+.zone { margin: 16px 16px 0; padding-top: 12px; border-top: 1px solid var(--line); }
+.zone-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+.zone-h h3 { font-size: 17px; font-weight: 600; }
+.zone-h small { display: block; font-family: var(--font-body); font-weight: 400; color: var(--muted); font-size: 12px; }
+.metric { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; margin-top: 8px; font-size: 13px; }
+.metric .val { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.bar { grid-column: 1 / -1; position: relative; height: 10px; background: color-mix(in srgb, var(--muted) 16%, transparent); }
+.bar .fill { position: absolute; inset: 0 auto 0 0; background: var(--c); }
+.bar .tick { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); opacity: .55; }
+.bar-scale { grid-column: 1 / -1; display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.flags { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 16px 0; }
+.flag { font-size: 12px; padding: 3px 8px; border: 1px solid var(--high); color: var(--ink); border-radius: 3px; }
+.todo { margin: 16px 16px 0; padding-top: 12px; border-top: 1px solid var(--line); }
+.todo h3 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+.todo ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; }
+.hint { padding: 12px 16px 0; font-size: 13px; color: var(--muted); }
+
+/* method */
+.method { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px 28px; padding-top: 6px; }
+.method section { min-width: 0; }
+.method h2 { font-size: 19px; font-weight: 600; margin-bottom: 6px; }
+.method p, .method li { font-size: 14px; color: var(--muted); max-width: 65ch; }
+.method p { margin: 0 0 8px; }
+.method ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.method strong { color: var(--ink); font-weight: 600; }
+.tbl-wrap { overflow-x: auto; }
+table.th { border-collapse: collapse; font-size: 13px; min-width: 300px; }
+table.th th, table.th td { text-align: left; padding: 4px 10px 4px 0; border-bottom: 1px solid var(--line); }
+table.th th { font-weight: 600; color: var(--ink); }
+table.th td { color: var(--muted); font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">FireSmart Home Ignition Zone · LiDAR screening</div>
+      <h1>__H1__<span class="demo-tag">__TAG__</span></h1>
+      <p>__INTRO__</p>
+    </div>
+    <div class="tally" id="tally" aria-label="Properties by rating"></div>
+  </header>
+
+  <div class="layout">
+    <div class="mapcol">
+      <div class="controls">
+        <span class="lbl">Colour houses by</span>
+        <div class="seg" role="group" aria-label="Colour houses by">
+          <button id="by-overall" data-by="overall" aria-pressed="true">Overall</button>
+          <button id="by-zone1" data-by="zone1" aria-pressed="false">Zone 1</button>
+          <button id="by-zone2" data-by="zone2" aria-pressed="false">Zone 2</button>
+        </div>
+        <label><input type="checkbox" id="tg-ladder"> Ladder fuel</label>
+        <label><input type="checkbox" id="tg-zones"> All zone rings</label>
+      </div>
+      <div id="map" role="application" aria-label="Neighbourhood risk map"></div>
+      <div class="legend">
+        <span class="item"><span class="ramp"></span>Canopy height 0–22 m</span>
+        <span class="item"><span class="sw" style="background:var(--ladder);opacity:.75"></span>Ladder fuel (1–4 m)</span>
+        <span class="item"><span class="ring" style="--c:var(--z0)"></span>0–1.5 m</span>
+        <span class="item"><span class="ring" style="--c:var(--z1)"></span>Zone 1 · 1.5–10 m</span>
+        <span class="item"><span class="ring" style="--c:var(--z2)"></span>Zone 2 · 10–30 m</span>
+      </div>
+    </div>
+    <aside class="panel" aria-live="polite">
+      <div class="panel-head" id="panel-head"></div>
+      <div class="panel-body" id="panel-body"></div>
+    </aside>
+  </div>
+
+  <div class="method">
+    <section>
+      <h2>How the scores are built</h2>
+      <p>Each house footprint is found in the point cloud from smooth, single-return roof surfaces. Rings are measured from the wall: <strong>0–1.5 m</strong>, <strong>Zone 1 (1.5–10 m)</strong> and <strong>Zone 2 (10–30 m)</strong>, following the FireSmart Home Ignition Zone.</p>
+      <p><strong>Canopy</strong> is the share of each ring covered by vegetation 3 m or taller. <strong>Ladder fuel</strong> is the share of each ring with LiDAR returns between 1 and 4 m: shrubs, regen and low branches that carry fire from the ground into crowns.</p>
+    </section>
+    <section>
+      <h2>Thresholds</h2>
+      <p>Each measure scores 0 at the “ok” value and 100 at the “max” value. Zone 1 counts for 60% of the overall score, Zone 2 for 40%.</p>
+      <div class="tbl-wrap"><table class="th" id="thresholds"></table></div>
+      <p style="margin-top:8px">Flags add points: branches over the roof, an outbuilding within 10 m, or a steep slope.</p>
+    </section>
+    <section>
+      <h2>What LiDAR can’t see</h2>
+      <ul>
+        <li>The house itself: vents, gutters, decks, siding and roofing are where embers get in. Only an on-site assessment checks these.</li>
+        <li>Fuel type. Conifers and dry grass burn very differently from birch and maple.</li>
+        <li>Change since the flight. Ontario tiles can be several years old.</li>
+      </ul>
+      <p style="margin-top:8px">Use this to decide where to start, then follow up with a FireSmart assessment.</p>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+const DATA = /*__DATA__*/null;
+const CANOPY_IMG = "__CANOPY__";
+const LADDER_IMG = "__LADDER__";
+
+const RATINGS = ["Low", "Moderate", "High", "Extreme"];
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const rcol = (r) => `var(--${r.toLowerCase()})`;
+const rcolHex = (r) => css(`--${r.toLowerCase()}`);
+const ratingFor = (s) => { const ub = DATA.ratings; for (const r of RATINGS) if (s <= ub[r]) return r; return "Extreme"; };
+
+const houses = DATA.properties.features.filter(f => !f.properties.outbuilding);
+const outs = DATA.properties.features.filter(f => f.properties.outbuilding);
+const byId = Object.fromEntries(houses.map(f => [f.properties.property_id, f]));
+let colourBy = "overall";
+let selected = null;
+
+// ---- tally
+document.getElementById("tally").innerHTML = RATINGS.slice().reverse().map(r => {
+  const n = houses.filter(f => f.properties.rating === r).length;
+  return `<div style="--c:${rcol(r)}"><b>${n}</b><span>${r}</span></div>`;
+}).join("");
+
+// ---- thresholds table
+const sc = DATA.scoring;
+document.getElementById("thresholds").innerHTML =
+  `<tr><th></th><th>Canopy ok / max</th><th>Ladder ok / max</th></tr>` +
+  ["zone1", "zone2"].map(z => `<tr><th>${z === "zone1" ? "Zone 1" : "Zone 2"}</th>
+    <td>${sc[z].canopy_pct.ok}% / ${sc[z].canopy_pct.max}%</td>
+    <td>${sc[z].ladder_pct.ok}% / ${sc[z].ladder_pct.max}%</td></tr>`).join("");
+
+// ---- map
+const map = L.map("map", { zoomSnap: 0.25, attributionControl: true, maxZoom: 20 });
+map.attributionControl.setPrefix("");
+map.attributionControl.addAttribution(DATA.attribution);
+const b = DATA.raster.bounds;
+map.createPane("canopyPane").style.zIndex = 300;
+map.createPane("ladderPane").style.zIndex = 350;
+L.imageOverlay(CANOPY_IMG, b, { interactive: false, pane: "canopyPane" }).addTo(map);
+const ladderLayer = L.imageOverlay(LADDER_IMG, b, { interactive: false, opacity: 0.7, pane: "ladderPane" });
+map.fitBounds(b, { padding: [10, 10] });
+const LABEL_ZOOM = 16;
+function zoomClass() { map.getContainer().classList.toggle("lowzoom", map.getZoom() < LABEL_ZOOM); }
+map.on("zoomend", zoomClass); zoomClass();
+
+const zoneStyle = (z) => ({
+  zone0: { color: css("--z0"), weight: 1.5, dashArray: "3 3", fill: false },
+  zone1: { color: css("--z1"), weight: 2, fillColor: css("--z1"), fillOpacity: 0.08 },
+  zone2: { color: css("--z2"), weight: 2, fillColor: css("--z2"), fillOpacity: 0.05 },
+}[z]);
+const allZones = L.geoJSON(DATA.zones, { style: f => ({ ...zoneStyle(f.properties.zone), fillOpacity: 0, weight: 1, opacity: 0.6 }), interactive: false });
+let selZones = null;
+
+function scoreOf(p) {
+  if (colourBy === "zone1") return p.zone1_score;
+  if (colourBy === "zone2") return p.zone2_score;
+  return p.overall_score;
+}
+function centroid(f) {
+  const ring = f.geometry.coordinates[0];
+  let x = 0, y = 0; ring.slice(0, -1).forEach(c => { x += c[0]; y += c[1]; });
+  const n = ring.length - 1; return [y / n, x / n];
+}
+
+const fpLayer = L.geoJSON(DATA.properties, {
+  style: f => f.properties.outbuilding
+    ? { color: css("--ink"), weight: 1, fillColor: css("--surface"), fillOpacity: 0.9 }
+    : { color: "#ffffff", weight: 1.2, fillColor: rcolHex(ratingFor(scoreOf(f.properties))), fillOpacity: 1 },
+  onEachFeature: (f, layer) => { if (!f.properties.outbuilding) layer.on("click", () => select(f.properties.property_id)); }
+}).addTo(map);
+
+const markers = {};
+houses.forEach(f => {
+  const p = f.properties;
+  const m = L.marker(centroid(f), { icon: pinIcon(p), keyboard: true, title: `${p.property_id}: ${p.rating}` })
+    .on("click", () => select(p.property_id)).addTo(map);
+  markers[p.property_id] = m;
+});
+outs.forEach(f => L.marker(centroid(f), {
+  icon: L.divIcon({ className: "", html: `<div class="pin ob">OB</div>`, iconSize: [26, 16] }),
+  interactive: false
+}).addTo(map));
+
+function pinIcon(p) {
+  const r = ratingFor(scoreOf(p));
+  const sel = selected === p.property_id ? " sel" : "";
+  return L.divIcon({ className: "", html: `<div class="pin${sel}" style="--c:${rcol(r)}">${p.property_id}</div>`, iconSize: [34, 22], iconAnchor: [17, 30] });
+}
+function restyle() {
+  fpLayer.setStyle(f => f.properties.outbuilding
+    ? { color: css("--ink"), weight: 1, fillColor: css("--surface"), fillOpacity: 0.9 }
+    : { color: "#ffffff", weight: 1.2, fillColor: rcolHex(ratingFor(scoreOf(f.properties))), fillOpacity: 1 });
+  houses.forEach(f => markers[f.properties.property_id].setIcon(pinIcon(f.properties)));
+}
+
+// ---- controls
+document.querySelectorAll(".seg button").forEach(btn => btn.addEventListener("click", () => {
+  colourBy = btn.dataset.by;
+  document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", String(x === btn)));
+  restyle();
+  if (!selected) renderList();
+}));
+document.getElementById("tg-ladder").addEventListener("change", e => e.target.checked ? ladderLayer.addTo(map) : map.removeLayer(ladderLayer));
+document.getElementById("tg-zones").addEventListener("change", e => e.target.checked ? allZones.addTo(map) : map.removeLayer(allZones));
+
+// ---- panel
+const head = document.getElementById("panel-head");
+const body = document.getElementById("panel-body");
+
+function renderList() {
+  const key = colourBy === "overall" ? "overall_score" : `${colourBy}_score`;
+  const label = { overall: "overall", zone1: "Zone 1", zone2: "Zone 2" }[colourBy];
+  head.innerHTML = `<h2>Properties</h2><span class="lbl" style="font-size:12px;color:var(--muted)">by ${label} score</span>`;
+  const rows = houses.slice().sort((a, b) => b.properties[key] - a.properties[key]).map(f => {
+    const p = f.properties, s = p[key], r = ratingFor(s);
+    return `<li class="row" tabindex="0" data-id="${p.property_id}">
+      <span class="id">${p.property_id}</span>
+      <span class="mini">
+        <span>Zone 1</span><span class="num">${p.zone1_canopy_pct.toFixed(0)}%</span><span class="num">${p.zone1_ladder_pct.toFixed(0)}%</span>
+        <span>Zone 2</span><span class="num">${p.zone2_canopy_pct.toFixed(0)}%</span><span class="num">${p.zone2_ladder_pct.toFixed(0)}%</span>
+      </span>
+      <span class="pill" style="--c:${rcol(r)}">${s} · ${r}</span></li>`;
+  }).join("");
+  body.innerHTML = `<p class="hint">Select a house on the map or in the list to see its zones and what to do.</p><div class="list-head"><span>House</span><span class="mini"><span></span><span>Canopy</span><span>Ladder</span></span><span>Score</span></div><ul class="list">${rows}</ul>`;
+  body.querySelectorAll(".row").forEach(li => {
+    li.addEventListener("click", () => select(li.dataset.id));
+    li.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(li.dataset.id); } });
+  });
+}
+
+function metric(label, v, t, color) {
+  const pct = Math.min(v, 100);
+  return `<div class="metric"><span>${label}</span><span class="val">${v.toFixed(1)}%</span>
+    <div class="bar"><div class="fill" style="width:${pct}%;--c:${color}"></div>
+      <div class="tick" style="left:${t.ok}%" title="ok ${t.ok}%"></div>
+      <div class="tick" style="left:${t.max}%" title="max ${t.max}%"></div></div>
+    <div class="bar-scale"><span>ok ≤ ${t.ok}%</span><span>max ${t.max}%</span></div></div>`;
+}
+
+function renderDetail(p) {
+  head.innerHTML = `<h2>Property ${p.property_id}</h2><button class="back" id="back">All properties</button>`;
+  document.getElementById("back").addEventListener("click", () => select(null));
+  const zone = (z, name, range) => {
+    const r = p[`${z}_rating`];
+    return `<div class="zone">
+      <div class="zone-h"><h3>${name}<small>${range} from the house</small></h3>
+        <span class="pill" style="--c:${rcol(r)}">${p[`${z}_score`]} · ${r}</span></div>
+      ${metric("Tree canopy (3 m+)", p[`${z}_canopy_pct`], sc[z].canopy_pct, "var(--accent)")}
+      ${metric("Ladder fuel (1–4 m)", p[`${z}_ladder_pct`], sc[z].ladder_pct, "var(--ladder)")}
+    </div>`;
+  };
+  body.innerHTML = `
+    <div class="score-big"><b>${p.overall_score}</b><span class="pill" style="--c:${rcol(p.rating)}">${p.rating}</span><span>overall, 0–100</span></div>
+    <div class="scorebar"><i style="left:${p.overall_score}%"></i></div>
+    <div class="facts">
+      <div>Footprint<b>${Math.round(p.footprint_m2)} m²</b></div>
+      <div>Vegetation in 0–1.5 m<b>${p.zone0_veg_pct.toFixed(0)}%</b></div>
+      <div>Branches over roof<b>${p.branches_over_roof_pct.toFixed(0)}%</b></div>
+      <div>Nearest outbuilding<b>${p.nearest_outbuilding_m == null ? "none" : p.nearest_outbuilding_m + " m"}</b></div>
+      <div>Zone 1 canopy height<b>${p.zone1_mean_canopy_ht_m} m</b></div>
+      <div>Zone 2 slope<b>${p.zone2_mean_slope_deg}°</b></div>
+    </div>
+    ${p.flags.length ? `<div class="flags">${p.flags.map(f => `<span class="flag">${f}</span>`).join("")}</div>` : ""}
+    ${zone("zone1", "Zone 1", "1.5–10 m")}
+    ${zone("zone2", "Zone 2", "10–30 m")}
+    <div class="todo"><h3>What to do first</h3><ol>${p.recommendations.map(r => `<li>${r}</li>`).join("")}</ol></div>`;
+  body.scrollTop = 0;
+}
+
+function select(id) {
+  selected = id && byId[id] ? id : null;
+  if (selZones) { map.removeLayer(selZones); selZones = null; }
+  restyle();
+  if (!selected) {
+    renderList();
+    if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+    return;
+  }
+  const p = byId[selected].properties;
+  selZones = L.geoJSON({ type: "FeatureCollection", features: DATA.zones.features.filter(f => f.properties.property_id === selected) },
+    { style: f => zoneStyle(f.properties.zone), interactive: false }).addTo(map);
+  selZones.bringToBack();
+  map.flyToBounds(selZones.getBounds(), { padding: [30, 30], duration: 0.6, maxZoom: 19 });
+  renderDetail(p);
+  if (location.hash !== "#" + selected) history.replaceState(null, "", "#" + selected);
+}
+
+function fromHash() { const h = location.hash.replace("#", ""); select(byId[h] ? h : null); }
+window.addEventListener("hashchange", fromHash);
+fromHash();
+</script>

@@ -1,0 +1,58 @@
+# Tuned for NRCan/Ontario 2024 Sault Ste Marie UTM16 tiles (~20 pts/m², buildings classified as 6)
+# FireSmart LiDAR scoring configuration
+# Every threshold that drives a score lives here, so the method is transparent and
+# can be tuned with a local FireSmart rep without touching code.
+
+crs:
+  source_epsg: 3160          # NAD83(CSRS) / UTM 16N. Use 2958 for UTM 17N tiles (east of 84°W).
+  # Leave as-is to read the CRS from the LAS header when present.
+  prefer_header_crs: true
+
+raster:
+  cell_m: 1.0                # analysis grid resolution
+
+classes:
+  ground: [2]
+  noise: [7, 18]
+  building: [6]              # used only if present in the tile; otherwise detected from geometry
+  not_vegetation: [9, 17, 20] # water, bridge deck, ignored ground: never counted as fuel
+
+buildings:
+  min_roof_height_m: 2.5
+  max_cell_z_std_m: 0.35     # roofs are smooth; tree crowns are rough
+  max_multi_return_frac: 0.25
+  min_points_per_cell: 3
+  min_area_m2: 25
+  primary_min_area_m2: 70    # smaller structures are treated as outbuildings
+  min_compactness: 0.55      # area / convex-hull area
+
+zones_m:                     # distances from the building wall (FireSmart Home Ignition Zone)
+  zone0: [0.0, 1.5]          # non-combustible zone
+  zone1: [1.5, 10.0]
+  zone2: [10.0, 30.0]
+
+vegetation:
+  canopy_min_height_m: 3.0   # a cell is "canopy" if the tallest vegetation return is >= this
+  ladder_band_m: [1.0, 4.0]  # returns in this band bridge surface fuels to crowns
+  ladder_min_returns: 2      # ~20 pts/m² in the 2024 Sault Ste Marie lift
+
+# Hazard components scale linearly from 0 at `ok` to 100 at `max`.
+scoring:
+  zone1:
+    canopy_pct: {ok: 10, max: 50}
+    ladder_pct: {ok: 5,  max: 40}
+    weights:    {canopy: 0.5, ladder: 0.5}
+  zone2:
+    canopy_pct: {ok: 30, max: 70}
+    ladder_pct: {ok: 15, max: 60}
+    weights:    {canopy: 0.5, ladder: 0.5}
+  overall_weights: {zone1: 0.6, zone2: 0.4}
+  bumps:                     # added to the overall score (then capped at 100)
+    branches_over_roof_pct_gt_5: 10
+    outbuilding_within_10m: 10
+    zone2_mean_slope_deg_gt_15: 5
+  ratings:                   # upper bounds, inclusive
+    Low: 25
+    Moderate: 50
+    High: 75
+    Extreme: 100

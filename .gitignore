@@ -1,0 +1,8 @@
+# point clouds are large and come from NRCan/Ontario
+*.laz
+*.las
+data/
+# pipeline outputs (real runs contain property-level results; publish deliberately)
+output*/
+__pycache__/
+*.pyc
