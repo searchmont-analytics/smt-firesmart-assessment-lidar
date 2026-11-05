@@ -43,7 +43,7 @@ def write_vectors(results, rings, outbuildings, crs, out: Path):
     (out / "zones.geojson").write_text(json.dumps({"type": "FeatureCollection", "features": rfeats}))
 
     cols = [k for k in results[0] if not k.startswith("_") and k not in ("recommendations",)]
-    with open(out / "properties.csv", "w", newline="") as f:
+    with open(out / "properties.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=cols + ["recommendations"])
         w.writeheader()
         for m in results:

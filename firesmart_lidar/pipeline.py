@@ -47,7 +47,7 @@ class Grid:
 
 
 def load_config(path: str | Path) -> dict:
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
@@ -163,7 +163,7 @@ def footprints_from_mask(mask, grid: Grid, cfg):
 
 def footprints_from_file(path: Path, to_tile_crs):
     import json
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         gj = json.load(f)
     polys = [shape(ft["geometry"]) for ft in gj["features"]]
     return [shapely.ops.transform(to_tile_crs, p) for p in polys]

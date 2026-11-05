@@ -7,8 +7,8 @@ import numpy as np
 from pyproj import Transformer
 from shapely.geometry import shape
 
-truth = json.loads(Path(sys.argv[1]).read_text())
-props = json.loads(Path(sys.argv[2]).read_text())
+truth = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+props = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
 to_utm = Transformer.from_crs(4326, 3160, always_xy=True)
 
 houses = [f for f in props["features"] if not f["properties"].get("outbuilding")]

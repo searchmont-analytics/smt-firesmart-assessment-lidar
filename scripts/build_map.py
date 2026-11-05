@@ -29,17 +29,19 @@ def main():
     ap.add_argument("--attribution", default="Synthetic LiDAR tile · method after FireSmart Canada HIZ")
     a = ap.parse_args()
 
-    summary = json.loads((a.out / "summary.json").read_text())
+    summary = json.loads((a.out / "summary.json").read_text(encoding="utf-8"))
     data = {
-        "properties": json.loads((a.out / "properties.geojson").read_text()),
-        "zones": json.loads((a.out / "zones.geojson").read_text()),
+        "properties": json.loads((a.out / "properties.geojson").read_text(encoding="utf-8")),
+        "zones": json.loads((a.out / "zones.geojson").read_text(encoding="utf-8")),
         "raster": summary["raster"],
         "scoring": summary["config"]["scoring"],
         "ratings": summary["config"]["scoring"]["ratings"],
         "attribution": a.attribution,
     }
-    html = (ROOT / "web" / "template.html").read_text()
-    html = (html.replace("/*__LEAFLET_CSS__*/", a.leaflet_css.read_text())
+    html = (ROOT / "web" / "template.html").read_text(encoding="utf-8")
+    if "charset" not in html[:1024].lower():   # opened straight from disk, browsers guess cp1252 otherwise
+        html = '<meta charset="utf-8">\n' + html
+    html = (html.replace("/*__LEAFLET_CSS__*/", a.leaflet_css.read_text(encoding="utf-8"))
                 .replace("/*__DATA__*/null", json.dumps(data, separators=(",", ":")))
                 .replace("__CANOPY__", b64(a.out / summary["raster"].get("canopy_file", "canopy.png")))
                 .replace("__LADDER__", b64(a.out / "ladder.png"))
@@ -48,7 +50,7 @@ def main():
     if a.cta_href:
         html = html.replace("<!--__CTA__-->", f'<a class="cta" href="{a.cta_href}">{a.cta_text} <small>password required</small></a>')
     dest = a.html or (a.out / "risk_map.html")
-    dest.write_text(html)
+    dest.write_text(html, encoding="utf-8")
     print(f"wrote {dest} ({dest.stat().st_size / 1e6:.1f} MB)")
 
 
